@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Projects Gallery</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;600&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0a0010;
+      font-family: 'Poppins', sans-serif;
+      color: #fff;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ─── GLITTER CANVAS ─── */
+    #glitter-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── SECTION WRAPPER ─── */
+    .gallery-section {
+      position: relative;
+      z-index: 1;
+      padding: 60px 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .gallery-section h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      text-align: center;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #ff69b4, #da70d6, #9b59b6, #ff1493);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      animation: titlePulse 3s ease-in-out infinite;
+    }
+
+    @keyframes titlePulse {
+      0%, 100% { filter: drop-shadow(0 0 8px #ff69b4aa); }
+      50%       { filter: drop-shadow(0 0 22px #da70d6cc); }
+    }
+
+    .gallery-section .subtitle {
+      text-align: center;
+      color: #c084fc;
+      margin-bottom: 50px;
+      font-size: 0.95rem;
+      letter-spacing: 2px;
+      opacity: 0.8;
+    }
+
+    /* ─── PROJECT BOXES GRID ─── */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 20px;
+    }
+
+    .project-box {
+      position: relative;
+      background: linear-gradient(145deg, #1a0025, #2d0040);
+      border: 1.5px solid #9b59b6;
+      border-radius: 16px;
+      padding: 28px 16px;
+      text-align: center;
+      cursor: pointer;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+      animation: boxEntrance 0.6s ease both;
+    }
+
+    .project-box:nth-child(1) { animation-delay: 0.05s; }
+    .project-box:nth-child(2) { animation-delay: 0.10s; }
+    .project-box:nth-child(3) { animation-delay: 0.15s; }
+    .project-box:nth-child(4) { animation-delay: 0.20s; }
+    .project-box:nth-child(5) { animation-delay: 0.25s; }
+    .project-box:nth-child(6) { animation-delay: 0.30s; }
+
+    @keyframes boxEntrance {
+      from { opacity: 0; transform: translateY(30px) scale(0.9); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* shimmer sweep */
+    .project-box::before {
+      content: '';
+      position: absolute;
+      top: -60%;
+      left: -60%;
+      width: 60%;
+      height: 200%;
+      background: linear-gradient(120deg, transparent, rgba(255,105,180,0.18), transparent);
+      transform: rotate(25deg);
+      transition: left 0.5s ease;
+    }
+
+    .project-box:hover::before {
+      left: 130%;
+    }
+
+    /* glow ring on hover */
+    .project-box:hover {
+      transform: translateY(-8px) scale(1.04);
+      border-color: #ff69b4;
+      box-shadow:
+        0 0 15px #ff69b466,
+        0 0 35px #9b59b633,
+        inset 0 0 20px #ff69b411;
+    }
+
+    .project-box .icon {
+      font-size: 2.2rem;
+      margin-bottom: 12px;
+      display: block;
+      filter: drop-shadow(0 0 6px #da70d6);
+      animation: iconFloat 2.5s ease-in-out infinite;
+    }
+
+    @keyframes iconFloat {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-5px); }
+    }
+
+    .project-box .name {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #e879f9;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      line-height: 1.4;
+    }
+
+    .project-box .click-hint {
+      margin-top: 10px;
+      font-size: 0.65rem;
+      color: #c084fc88;
+      letter-spacing: 1px;
+    }
+
+    /* ─── LIGHTBOX / MODAL ─── */
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(5, 0, 15, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      justify-content: center;
+      align-items: flex-start;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .lightbox.open {
+      display: flex;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .lightbox-inner {
+      position: relative;
+      width: 100%;
+      max-width: 960px;
+      margin: auto;
+      animation: slideUp 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(60px) scale(0.95); opacity: 0; }
+      to   { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    /* glitter burst at top of modal */
+    .lightbox-inner::before {
+      content: '✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦';
+      display: block;
+      text-align: center;
+      font-size: 1rem;
+      color: #ff69b4;
+      letter-spacing: 8px;
+      margin-bottom: 16px;
+      animation: glitterRow 1.8s ease-in-out infinite;
+      text-shadow: 0 0 8px #ff69b4, 0 0 16px #da70d6;
+    }
+
+    @keyframes glitterRow {
+      0%, 100% { opacity: 1; letter-spacing: 8px; }
+      50%       { opacity: 0.5; letter-spacing: 14px; }
+    }
+
+    .lightbox-title {
+      font-family: 'Orbitron', sans-serif;
+      text-align: center;
+      font-size: clamp(1.2rem, 3vw, 2rem);
+      margin-bottom: 30px;
+      background: linear-gradient(90deg, #ff69b4, #c084fc, #a855f7, #ff1493);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradientShift 2.5s ease infinite;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+    }
+
+    @keyframes gradientShift {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .media-strip {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      padding: 10px 4px 20px;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: thin;
+      scrollbar-color: #9b59b6 #1a0025;
+    }
+
+    .media-strip::-webkit-scrollbar { height: 6px; }
+    .media-strip::-webkit-scrollbar-track { background: #1a0025; border-radius: 99px; }
+    .media-strip::-webkit-scrollbar-thumb { background: #9b59b6; border-radius: 99px; }
+
+    .media-item {
+      flex: 0 0 280px;
+      scroll-snap-align: start;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 2px solid #9b59b655;
+      position: relative;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      animation: mediaEntrance 0.5s ease both;
+    }
+
+    @keyframes mediaEntrance {
+      from { opacity: 0; transform: scale(0.85) rotate(-2deg); }
+      to   { opacity: 1; transform: scale(1) rotate(0); }
+    }
+
+    .media-item:nth-child(1) { animation-delay: 0.05s; }
+    .media-item:nth-child(2) { animation-delay: 0.12s; }
+    .media-item:nth-child(3) { animation-delay: 0.19s; }
+    .media-item:nth-child(4) { animation-delay: 0.26s; }
+    .media-item:nth-child(5) { animation-delay: 0.33s; }
+
+    .media-item:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px #ff69b455, 0 0 40px #9b59b633;
+      border-color: #ff69b4;
+    }
+
+    .media-item img,
+    .media-item video {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .media-label {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: linear-gradient(to top, rgba(10,0,20,0.9), transparent);
+      padding: 20px 12px 10px;
+      font-size: 0.72rem;
+      color: #e879f9;
+      font-family: 'Orbitron', sans-serif;
+      letter-spacing: 1px;
+    }
+
+    /* close button */
+    .close-btn {
+      position: fixed;
+      top: 24px;
+      right: 30px;
+      width: 44px;
+      height: 44px;
+      border: 2px solid #ff69b4;
+      border-radius: 50%;
+      background: rgba(10,0,20,0.9);
+      color: #ff69b4;
+      font-size: 1.3rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.3s ease;
+      z-index: 1001;
+      box-shadow: 0 0 12px #ff69b466;
+    }
+
+    .close-btn:hover {
+      background: #ff69b4;
+      color: #0a0010;
+      transform: rotate(90deg) scale(1.1);
+      box-shadow: 0 0 24px #ff69b4aa;
+    }
+
+    /* ─── EMPTY STATE placeholder ─── */
+    .media-placeholder {
+      flex: 0 0 260px;
+      height: 200px;
+      border-radius: 14px;
+      background: linear-gradient(145deg, #1a0025, #2d0040);
+      border: 2px dashed #9b59b655;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #c084fc88;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+      gap: 8px;
+    }
+
+    .media-placeholder span { font-size: 2rem; }
+
+    /* ─── DECORATIVE LINES ─── */
+    .deco-line {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #9b59b6, #ff69b4, #9b59b6, transparent);
+      margin: 40px 0;
+      animation: lineGlow 3s ease-in-out infinite;
+    }
+
+    @keyframes lineGlow {
+      0%, 100% { opacity: 0.5; }
+      50%       { opacity: 1; box-shadow: 0 0 8px #ff69b4; }
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 600px) {
+      .gallery-section { padding: 40px 20px; }
+      .projects-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; }
+      .media-item { flex: 0 0 220px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Glitter background canvas -->
+<canvas id="glitter-canvas"></canvas>
+
+<!-- ══════════════════════════════════════
+     PROJECTS GALLERY SECTION
+     ══════════════════════════════════════ -->
+<section class="gallery-section">
+
+  <h1>✦ Projects Gallery ✦</h1>
+  <p class="subtitle">Click any project to explore</p>
+
+  <div class="deco-line"></div>
+
+  <!-- ─── PROJECT BOXES ─── -->
+  <!--
+    HOW TO ADD / EDIT PROJECTS:
+    1. Add a new .project-box div below (copy any existing one)
+    2. Give it data-project="unique-id"  and  data-title="Your Title"
+    3. In the <script> section, add a matching entry to the `projects` object
+       with photo URLs and video URLs.
+  -->
+  <div class="projects-grid">
+
+    <div class="project-box" data-project="portfolio" data-title="My Portfolio">
+      <span class="icon">🌸</span>
+      <div class="name">My Portfolio</div>
+      <div class="click-hint">tap to view</div>
+    </div>
+
+    <div class="project-box" data-project="ecommerce" data-title="E-Commerce App">
+      <span class="icon">🛍️</span>
+      <div class="name">E-Commerce App</div>
+      <div class="click-hint">tap to view</div>
+    </div>
+
+    <div class="project-box" data-project="social" data-title="Social Media UI">
+      <span class="icon">💜</span>
+      <div class="name">Social Media UI</div>
+      <div class="click-hint">tap to view</div>
+    </div>
+
+    <div class="project-box" data-project="dashboard" data-title="Analytics Dashboard">
+      <span class="icon">📊</span>
+      <div class="name">Analytics Dashboard</div>
+      <div class="click-hint">tap to view</div>
+    </div>
+
+    <div class="project-box" data-project="mobile" data-title="Mobile App">
+      <span class="icon">📱</span>
+      <div class="name">Mobile App</div>
+      <div class="click-hint">tap to view</div>
+    </div>
+
+    <div class="project-box" data-project="branding" data-title="Brand Design">
+      <span class="icon">🎨</span>
+      <div class="name">Brand Design</div>
+      <div class="click-hint">tap to view</div>
+    </div>
+
+  </div>
+
+  <div class="deco-line"></div>
+
+</section>
+
+<!-- ─── LIGHTBOX MODAL ─── -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true">
+  <button class="close-btn" id="closeBtn" aria-label="Close">✕</button>
+  <div class="lightbox-inner">
+    <div class="lightbox-title" id="lightbox-title">Project Name</div>
+    <div class="media-strip" id="media-strip">
+      <!-- dynamically filled -->
+    </div>
+  </div>
+</div>
+
+
+<script>
+  /* ═══════════════════════════════════════════════════════
+     PROJECT DATA
+     Add photos and videos for each project here.
+     Replace placeholder URLs with your actual image/video paths.
+     e.g. photos: ["images/portfolio1.jpg", "images/portfolio2.jpg"]
+            videos: ["videos/demo.mp4"]
+     ═══════════════════════════════════════════════════════ */
+  const projects = {
+    portfolio: {
+      photos: [
+        "https://picsum.photos/seed/port1/600/400",
+        "https://picsum.photos/seed/port2/600/400",
+        "https://picsum.photos/seed/port3/600/400"
+      ],
+      videos: []
+      // videos: ["videos/portfolio-demo.mp4"]
+    },
+    ecommerce: {
+      photos: [
+        "https://picsum.photos/seed/shop1/600/400",
+        "https://picsum.photos/seed/shop2/600/400"
+      ],
+      videos: []
+    },
+    social: {
+      photos: [
+        "https://picsum.photos/seed/soc1/600/400",
+        "https://picsum.photos/seed/soc2/600/400",
+        "https://picsum.photos/seed/soc3/600/400",
+        "https://picsum.photos/seed/soc4/600/400"
+      ],
+      videos: []
+    },
+    dashboard: {
+      photos: [
+        "https://picsum.photos/seed/dash1/600/400",
+        "https://picsum.photos/seed/dash2/600/400"
+      ],
+      videos: []
+    },
+    mobile: {
+      photos: [
+        "https://picsum.photos/seed/mob1/600/400",
+        "https://picsum.photos/seed/mob2/600/400",
+        "https://picsum.photos/seed/mob3/600/400"
+      ],
+      videos: []
+    },
+    branding: {
+      photos: [
+        "https://picsum.photos/seed/brand1/600/400",
+        "https://picsum.photos/seed/brand2/600/400"
+      ],
+      videos: []
+    }
+  };
+
+
+  /* ═══════════════════════════════════════════════════════
+     LIGHTBOX LOGIC
+     ═══════════════════════════════════════════════════════ */
+  const lightbox   = document.getElementById('lightbox');
+  const closeBtn   = document.getElementById('closeBtn');
+  const titleEl    = document.getElementById('lightbox-title');
+  const strip      = document.getElementById('media-strip');
+
+  document.querySelectorAll('.project-box').forEach(box => {
+    box.addEventListener('click', () => {
+      const key   = box.dataset.project;
+      const title = box.dataset.title;
+      const data  = projects[key] || { photos: [], videos: [] };
+
+      titleEl.textContent = title;
+      strip.innerHTML = '';
+
+      let count = 0;
+
+      data.photos.forEach((src, i) => {
+        count++;
+        const item  = document.createElement('div');
+        item.className = 'media-item';
+        item.style.animationDelay = (i * 0.07) + 's';
+
+        const img   = document.createElement('img');
+        img.src     = src;
+        img.alt     = title + ' photo ' + (i + 1);
+        img.loading = 'lazy';
+
+        const label = document.createElement('div');
+        label.className = 'media-label';
+        label.textContent = 'Photo ' + (i + 1);
+
+        item.appendChild(img);
+        item.appendChild(label);
+        strip.appendChild(item);
+      });
+
+      data.videos.forEach((src, i) => {
+        count++;
+        const item  = document.createElement('div');
+        item.className = 'media-item';
+        item.style.animationDelay = ((data.photos.length + i) * 0.07) + 's';
+
+        const vid   = document.createElement('video');
+        vid.src     = src;
+        vid.controls = true;
+        vid.loop    = false;
+        vid.muted   = false;
+
+        const label = document.createElement('div');
+        label.className = 'media-label';
+        label.textContent = '▶ Video ' + (i + 1);
+
+        item.appendChild(vid);
+        item.appendChild(label);
+        strip.appendChild(item);
+      });
+
+      if (count === 0) {
+        const ph = document.createElement('div');
+        ph.className = 'media-placeholder';
+        ph.innerHTML = '<span>📂</span>No media added yet';
+        strip.appendChild(ph);
+      }
+
+      lightbox.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      burstGlitter();
+    });
+  });
+
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    document.body.style.overflow = '';
+    // pause all videos
+    strip.querySelectorAll('video').forEach(v => v.pause());
+  }
+
+  closeBtn.addEventListener('click', closeLightbox);
+  lightbox.addEventListener('click', e => {
+    if (e.target === lightbox) closeLightbox();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeLightbox();
+  });
+
+
+  /* ═══════════════════════════════════════════════════════
+     GLITTER CANVAS — background sparkles
+     ═══════════════════════════════════════════════════════ */
+  const canvas = document.getElementById('glitter-canvas');
+  const ctx    = canvas.getContext('2d');
+
+  const COLORS = ['#ff69b4','#da70d6','#c084fc','#a855f7','#ff1493','#fff','#e879f9'];
+
+  let W, H, particles = [];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+
+  function Particle(x, y, isBurst) {
+    this.x     = x ?? Math.random() * W;
+    this.y     = y ?? Math.random() * H;
+    this.r     = isBurst ? (Math.random() * 4 + 1) : (Math.random() * 2 + 0.3);
+    this.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+    this.vx    = (Math.random() - 0.5) * (isBurst ? 4 : 0.4);
+    this.vy    = (Math.random() - 0.5) * (isBurst ? 4 : 0.4) - (isBurst ? 2 : 0);
+    this.alpha = 1;
+    this.decay = isBurst ? (Math.random() * 0.025 + 0.01) : (Math.random() * 0.004 + 0.001);
+    this.twinkle = Math.random() * Math.PI * 2;
+  }
+
+  // seed 120 ambient particles
+  for (let i = 0; i < 120; i++) particles.push(new Particle());
+
+  function burstGlitter() {
+    for (let i = 0; i < 80; i++) {
+      particles.push(new Particle(W / 2 + (Math.random() - 0.5) * W * 0.6, H * 0.3, true));
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach((p, i) => {
+      p.twinkle += 0.05;
+      const tw   = 0.5 + 0.5 * Math.sin(p.twinkle);
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r * tw, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.alpha * tw;
+      ctx.shadowBlur  = 6;
+      ctx.shadowColor = p.color;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.shadowBlur  = 0;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.alpha -= p.decay;
+      // respawn ambient particles
+      if (p.alpha <= 0) {
+        particles[i] = new Particle();
+      }
+    });
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+</script>
+
+</body>
+</html>
